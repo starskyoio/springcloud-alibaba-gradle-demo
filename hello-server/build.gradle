@@ -1,0 +1,36 @@
+plugins {
+    id "org.springframework.boot"
+    id "com.google.cloud.tools.jib"
+}
+
+dependencies {
+    implementation project(":common")
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+tasks.named("bootJar") {
+    manifest {
+        attributes 'Start-Class': 'io.starskyoio.hello.HelloApplication'
+    }
+}
+
+jib {
+    from {
+        image = 'registry.cn-chengdu.aliyuncs.com/dlhope-common/zulu-openjdk-apline:8u322-jre-headless'
+    }
+    to {
+        image = 'registry.cn-chengdu.aliyuncs.com/dlhope/hello-server'
+        auth {
+            username="${dockerUsername}"
+            password="${dockerPwd}"
+        }
+        tags = ["${project.version}", 'latest']
+    }
+    container {
+        creationTime='USE_CURRENT_TIMESTAMP'
+        jvmFlags = ['-Djava.security.egd=file:/dev/./urandom', '-Dfile.encoding=utf-8', '-Duser.timezone=GMT+08']
+        mainClass = 'io.starskyoio.hello.HelloApplication'
+        ports = ['8080']
+    }
+}

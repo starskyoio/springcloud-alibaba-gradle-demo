@@ -1,0 +1,77 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        maven {
+            allowInsecureProtocol = true
+            credentials {
+                username "${nexusUsername}"
+                password "${nexusPwd}"
+            }
+            url "${nexusUrl}"
+        }
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
+        classpath "io.spring.gradle:dependency-management-plugin:1.0.12.RELEASE"
+    }
+}
+
+ext {
+    set("springCloudVersion", "2021.0.3")
+    set("springCloudAlibabaVersion", "2021.0.1.0")
+}
+
+allprojects {
+    group = 'io.starskyoio'
+    version = "${projectVersion}"
+
+    apply plugin: 'java'
+    apply plugin: 'io.spring.dependency-management'
+
+    sourceCompatibility = "${javaVersion}"
+    targetCompatibility = "${javaVersion}"
+
+    repositories {
+        mavenLocal()
+        maven {
+            allowInsecureProtocol = true
+            credentials {
+                username "${nexusUsername}"
+                password "${nexusPwd}"
+            }
+            url "${nexusUrl}"
+        }
+        mavenCentral()
+    }
+
+
+    dependencyManagement {
+        imports {
+            mavenBom "org.springframework.boot:spring-boot-dependencies:${springBootVersion}"
+            mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+            mavenBom "com.alibaba.cloud:spring-cloud-alibaba-dependencies:${springCloudAlibabaVersion}"
+        }
+
+        dependencies {
+
+        }
+    }
+
+    configurations {
+        compileOnly {
+            extendsFrom annotationProcessor
+        }
+    }
+
+    tasks.named('test') {
+        useJUnitPlatform()
+    }
+}
+
+subprojects {
+    dependencies {
+        compileOnly "org.projectlombok:lombok"
+        annotationProcessor "org.projectlombok:lombok"
+    }
+}
